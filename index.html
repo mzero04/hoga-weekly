@@ -859,7 +859,7 @@
             btn.disabled = false;
 
             if (error) {
-                showLoginError('Login gagal: email atau password salah.');
+                showLoginError('Login gagal: ' + error.message);
                 return;
             }
             currentSession = data.session;
