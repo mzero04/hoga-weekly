@@ -512,6 +512,7 @@
                                 <th class="p-3">PP Approval</th>
                                 <th class="p-3">Chief Sample</th>
                                 <th class="p-3">Status Line</th>
+                                <th class="p-3">Catatan / Remark</th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -1243,7 +1244,7 @@
             const tbodyMon = document.getElementById('tableMonitoringBody');
             
             if (filteredMon.length === 0) {
-                tbodyMon.innerHTML = `<tr><td colspan="12" class="text-center py-6 text-slate-400">Tidak ada data monitoring ditemukan</td></tr>`;
+                tbodyMon.innerHTML = `<tr><td colspan="13" class="text-center py-6 text-slate-400">Tidak ada data monitoring ditemukan</td></tr>`;
             } else {
                 tbodyMon.innerHTML = filteredMon.map(item => {
                     const daysLeft = calculateDaysToStart(item.reportDate, item.plannedStartDate);
@@ -1267,6 +1268,7 @@
                             <td class="p-3">${formatMiniBadge(item.ppApprovalStatus)}</td>
                             <td class="p-3">${formatMiniBadge(item.chiefSampleStatus)}</td>
                             <td class="p-3">${statusBadge}</td>
+                            <td class="p-3 text-slate-600 max-w-xs truncate" title="${esc(item.remark)}">${esc(item.remark)}</td>
                             <td class="p-3 text-center">
                                 <div class="flex items-center justify-center space-x-2">
                                     <button onclick="editMonitoring('${esc(item.id)}')" class="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Edit"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
