@@ -957,7 +957,7 @@
             document.getElementById('monLine').innerHTML += lineOptionsHtml;
             document.getElementById('monPreLayoutStatus').innerHTML = statusOptionsHtml;
             document.getElementById('monPpApprovalStatus').innerHTML = statusOptionsHtml;
-            document.getElementById('monChiefSampleStatus').innerHTML = statusOptionsHtml;
+            document.getElementById('monChiefSampleStatus').innerHTML = '<option value="X">X (Belum)</option><option value="O">O (Sudah)</option>';
 
             // Overline Dropdowns
             document.getElementById('ovrEngineer').innerHTML += engOptionsHtml;
@@ -1110,7 +1110,7 @@
                 plannedStartDate: document.getElementById('monPlannedStartDate').value,
                 preLayoutStatus: document.getElementById('monPreLayoutStatus').value,
                 ppApprovalStatus: document.getElementById('monPpApprovalStatus').value,
-                chiefSampleStatus: document.getElementById('monChiefSampleStatus').value,
+                chiefSampleStatus: chiefToDb(document.getElementById('monChiefSampleStatus').value),
                 remark: document.getElementById('monRemark').value || '-'
             };
 
@@ -1185,7 +1185,7 @@
             document.getElementById('monPlannedStartDate').value = item.plannedStartDate;
             document.getElementById('monPreLayoutStatus').value = item.preLayoutStatus;
             document.getElementById('monPpApprovalStatus').value = item.ppApprovalStatus;
-            document.getElementById('monChiefSampleStatus').value = item.chiefSampleStatus;
+            document.getElementById('monChiefSampleStatus').value = chiefLabel(item.chiefSampleStatus);
             document.getElementById('monRemark').value = item.remark;
 
             calcDaysToStart();
@@ -1266,7 +1266,7 @@
                             <td class="p-3 font-semibold ${daysLeft < 3 ? 'text-rose-600' : 'text-slate-700'}">${daysLeft} hr</td>
                             <td class="p-3">${formatMiniBadge(item.preLayoutStatus)}</td>
                             <td class="p-3">${formatMiniBadge(item.ppApprovalStatus)}</td>
-                            <td class="p-3">${formatMiniBadge(item.chiefSampleStatus)}</td>
+                            <td class="p-3">${formatChiefBadge(item.chiefSampleStatus)}</td>
                             <td class="p-3">${statusBadge}</td>
                             <td class="p-3 text-slate-600 max-w-xs truncate" title="${esc(item.remark)}">${esc(item.remark)}</td>
                             <td class="p-3 text-center">
@@ -1318,6 +1318,19 @@
             }
 
             safeIcons();
+        }
+
+        // Chief Sample ditampilkan sebagai O / X (di database tetap disimpan Done / Not Started)
+        function chiefLabel(status) {
+            return (status === 'Done' || status === 'N/A') ? 'O' : 'X';
+        }
+        function chiefToDb(v) {
+            return String(v).trim().toUpperCase() === 'O' ? 'Done' : 'Not Started';
+        }
+        function formatChiefBadge(status) {
+            return chiefLabel(status) === 'O'
+                ? `<span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded">O</span>`
+                : `<span class="text-xs px-2 py-0.5 bg-rose-100 text-rose-800 font-bold rounded">X</span>`;
         }
 
         function formatMiniBadge(status) {
@@ -1524,7 +1537,7 @@
 
             const monRows = monitoringList.map(m => [
                 m.reportDate, m.engineer, m.line, m.currentStyle, m.nextStyle, m.plannedStartDate,
-                m.preLayoutStatus, m.ppApprovalStatus, m.chiefSampleStatus, m.remark
+                m.preLayoutStatus, m.ppApprovalStatus, chiefLabel(m.chiefSampleStatus), m.remark
             ]);
             const ovrRows = overlineList.map(o => [
                 o.reportWeekStart, o.engineer, o.line, o.currentStyle, o.nextStyle,
@@ -1610,7 +1623,7 @@
                                 plannedStartDate,
                                 preLayoutStatus: normStatus(getCol(r, 'Pre-layout Status'), 'Not Started'),
                                 ppApprovalStatus: normStatus(getCol(r, 'PP Approval Status'), 'Not Started'),
-                                chiefSampleStatus: normStatus(getCol(r, 'Chief Sample Status'), 'Not Started'),
+                                chiefSampleStatus: chiefToDb(['o','done','n/a'].includes(String(getCol(r, 'Chief Sample Status')).trim().toLowerCase()) ? 'O' : 'X'),
                                 remark: String(getCol(r, 'Remark')).trim() || '-'
                             }));
                         });
