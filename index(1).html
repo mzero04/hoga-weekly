@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOGA B – Weekly Line Monitoring System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- ================= LOGIN SCREEN ================= -->
+    <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-50 flex items-center justify-center px-4">
+        <div class="w-full max-w-sm">
+            <div class="bg-indigo-900 text-white rounded-t-xl px-6 py-5 flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2 rounded-lg">
+                    <i data-lucide="activity" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">HOGA B</h1>
+                    <p class="text-xs text-indigo-200">Weekly Line Monitoring System</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-b-xl border border-slate-200 border-t-0 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-800">Login</h2>
+                <p class="text-xs text-slate-500 mb-5">Masuk dengan akun yang diberikan oleh admin.</p>
+
+                <form id="formLogin" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Email</label>
+                        <input type="email" id="loginEmail" required autocomplete="username" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Password</label>
+                        <input type="password" id="loginPassword" required autocomplete="current-password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <p id="loginError" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-100 rounded-lg p-2.5"></p>
+                    <button type="submit" id="loginBtn" class="w-full px-5 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm font-medium shadow-sm transition flex items-center justify-center space-x-2">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Masuk</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header id="appHeader" class="hidden bg-indigo-900 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-600 p-2 rounded-lg">
+                        <i data-lucide="activity" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">HOGA B</h1>
+                        <p class="text-xs text-indigo-200">Weekly Line Monitoring System</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1" id="desktopNav">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-2 rounded-md text-sm font-medium transition flex items-center space-x-2 bg-indigo-800 text-white">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('monitoring')" id="nav-monitoring" class="px-3 py-2 rounded-md text-sm font-medium transition flex items-center space-x-2 text-indigo-200 hover:bg-indigo-800 hover:text-white">
+                        <i data-lucide="file-plus" class="w-4 h-4"></i>
+                        <span>Input Monitoring</span>
+                    </button>
+                    <button onclick="switchTab('overline')" id="nav-overline" class="px-3 py-2 rounded-md text-sm font-medium transition flex items-center space-x-2 text-indigo-200 hover:bg-indigo-800 hover:text-white">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                        <span>Input Overline</span>
+                    </button>
+                    <button onclick="switchTab('records')" id="nav-records" class="px-3 py-2 rounded-md text-sm font-medium transition flex items-center space-x-2 text-indigo-200 hover:bg-indigo-800 hover:text-white">
+                        <i data-lucide="database" class="w-4 h-4"></i>
+                        <span>Data Records</span>
+                    </button>
+                    <button onclick="switchTab('users')" id="nav-users" class="hidden px-3 py-2 rounded-md text-sm font-medium transition flex items-center space-x-2 text-indigo-200 hover:bg-indigo-800 hover:text-white">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>Users</span>
+                    </button>
+                </nav>
+
+                <!-- Action Quick Buttons -->
+                <div class="flex items-center space-x-2">
+                    <span id="currentUserLabel" class="hidden lg:inline text-xs text-indigo-200 max-w-[180px] truncate"></span>
+                    <button id="btnResetDemo" onclick="resetToDefaultData()" class="hidden p-2 text-indigo-200 hover:text-white hover:bg-indigo-800 rounded-md text-xs flex items-center space-x-1" title="Reset ke Data Sample">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Reset Demo</span>
+                    </button>
+                    <button onclick="handleLogout()" class="p-2 text-indigo-200 hover:text-white hover:bg-indigo-800 rounded-md text-xs flex items-center space-x-1" title="Logout">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div class="md:hidden border-t border-indigo-800 bg-indigo-900 px-2 pt-2 pb-3 flex justify-around text-xs">
+            <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="flex flex-col items-center p-2 text-white font-semibold">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mb-1"></i>
+                <span>Dashboard</span>
+            </button>
+            <button onclick="switchTab('monitoring')" id="mob-nav-monitoring" class="flex flex-col items-center p-2 text-indigo-300">
+                <i data-lucide="file-plus" class="w-5 h-5 mb-1"></i>
+                <span>Monitoring</span>
+            </button>
+            <button onclick="switchTab('overline')" id="mob-nav-overline" class="flex flex-col items-center p-2 text-indigo-300">
+                <i data-lucide="clock" class="w-5 h-5 mb-1"></i>
+                <span>Overline</span>
+            </button>
+            <button onclick="switchTab('records')" id="mob-nav-records" class="flex flex-col items-center p-2 text-indigo-300">
+                <i data-lucide="database" class="w-5 h-5 mb-1"></i>
+                <span>Records</span>
+            </button>
+            <button onclick="switchTab('users')" id="mob-nav-users" class="hidden flex flex-col items-center p-2 text-indigo-300">
+                <i data-lucide="users" class="w-5 h-5 mb-1"></i>
+                <span>Users</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main id="appMain" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- ================= TAB: DASHBOARD ================= -->
+        <section id="tab-dashboard" class="space-y-6">
+            <!-- Filter Bar -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-2 text-slate-700 font-semibold">
+                    <i data-lucide="filter" class="w-5 h-5 text-indigo-600"></i>
+                    <span>Filter Dashboard</span>
+                </div>
+                <div class="flex flex-wrap gap-3 items-center w-full sm:w-auto">
+                    <div>
+                        <select id="filterEngineer" onchange="renderDashboard()" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="ALL">Semua Engineer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="filterLine" onchange="renderDashboard()" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="ALL">Semua Line (B1-B31)</option>
+                        </select>
+                    </div>
+                    <button onclick="clearDashboardFilters()" class="text-xs text-indigo-600 hover:underline px-2 py-1">Reset Filter</button>
+                </div>
+            </div>
+
+            <!-- KPI Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Total Lines -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Line</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mt-1" id="kpi-total-lines">0</h3>
+                        <p class="text-xs text-slate-400 mt-1">Target Line B1-B31</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                        <i data-lucide="layers" class="w-6 h-6"></i>
+                    </div>
+                </div>
+
+                <!-- Total Ready -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Line Ready</p>
+                        <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="kpi-ready">0</h3>
+                        <p class="text-xs text-emerald-600 font-medium mt-1" id="kpi-ready-pct">0%</p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                    </div>
+                </div>
+
+                <!-- In Progress -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">In Progress</p>
+                        <h3 class="text-2xl font-bold text-amber-500 mt-1" id="kpi-in-progress">0</h3>
+                        <p class="text-xs text-amber-500 font-medium mt-1">Dalam Persiapan</p>
+                    </div>
+                    <div class="p-3 bg-amber-50 text-amber-500 rounded-lg">
+                        <i data-lucide="loader" class="w-6 h-6"></i>
+                    </div>
+                </div>
+
+                <!-- At Risk / Critical -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">At Risk / Delay</p>
+                        <h3 class="text-2xl font-bold text-rose-600 mt-1" id="kpi-at-risk">0</h3>
+                        <p class="text-xs text-rose-500 font-medium mt-1">Butuh Perhatian</p>
+                    </div>
+                    <div class="p-3 bg-rose-50 text-rose-600 rounded-lg">
+                        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                    </div>
+                </div>
+
+                <!-- Total Overlines -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Overline</p>
+                        <h3 class="text-2xl font-bold text-purple-600 mt-1" id="kpi-overlines">0</h3>
+                        <p class="text-xs text-purple-500 font-medium mt-1">Kejadian Overline</p>
+                    </div>
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-lg">
+                        <i data-lucide="history" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Readiness Doughnut -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
+                    <h3 class="text-base font-semibold text-slate-800 self-start mb-4">Status Kesiapan Line</h3>
+                    <div class="w-full max-w-[260px] h-[260px] relative">
+                        <canvas id="chartReadiness"></canvas>
+                    </div>
+                </div>
+
+                <!-- Engineer Readiness Breakdown -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h3 class="text-base font-semibold text-slate-800 mb-4">Status Kesiapan per Engineer</h3>
+                    <div class="h-[260px] w-full">
+                        <canvas id="chartEngineer"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Charts Row 2 -->
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Status Per Line Grid Chart -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-semibold text-slate-800">Monitoring Status Tahapan per Line (B1 - B31)</h3>
+                        <span class="text-xs text-slate-400">Green: Done/NA | Yellow: In Progress | Red: Pending/Not Started</span>
+                    </div>
+                    <div class="h-[300px] w-full">
+                        <canvas id="chartLineStatus"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB: FORM INPUT MONITORING ================= -->
+        <section id="tab-monitoring" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex items-center space-x-3 pb-4 mb-6 border-b border-slate-100">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Form Input Weekly Line Monitoring</h2>
+                        <p class="text-xs text-slate-500">Catat dan perbarui status persiapan lin industri secara berkala.</p>
+                    </div>
+                </div>
+
+                <form id="formMonitoring" onsubmit="handleSaveMonitoring(event)" class="space-y-6">
+                    <input type="hidden" id="monId" value="">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Report Date -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Report Date *</label>
+                            <input type="date" id="monReportDate" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Engineer -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Engineer PIC *</label>
+                            <select id="monEngineer" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">-- Pilih Engineer --</option>
+                            </select>
+                        </div>
+
+                        <!-- Line -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Line *</label>
+                            <select id="monLine" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">-- Pilih Line --</option>
+                            </select>
+                        </div>
+
+                        <!-- Planned Start Date -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Planned Start Date *</label>
+                            <input type="date" id="monPlannedStartDate" required onchange="calcDaysToStart()" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Current Style -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Current Style</label>
+                            <input type="text" id="monCurrentStyle" placeholder="Contoh: Style #A102" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Next Style -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Next Style</label>
+                            <input type="text" id="monNextStyle" placeholder="Contoh: Style #B205" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <!-- Calculated Days to Start Badge -->
+                    <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100 flex items-center justify-between">
+                        <span class="text-xs font-medium text-indigo-700">Days to Start (Dihitung Otomatis):</span>
+                        <span id="monDaysToStartDisplay" class="font-bold text-sm text-indigo-900">0 Hari</span>
+                    </div>
+
+                    <!-- Approval Status Options -->
+                    <div class="border-t border-slate-100 pt-4 space-y-4">
+                        <h3 class="text-sm font-semibold text-slate-800">Status Tahapan Kesiapan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Pre-layout Status -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Pre-layout Status</label>
+                                <select id="monPreLayoutStatus" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5">
+                                </select>
+                            </div>
+
+                            <!-- PP Approval Status -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">PP Approval Status</label>
+                                <select id="monPpApprovalStatus" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5">
+                                </select>
+                            </div>
+
+                            <!-- Chief Sample Status -->
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Chief Sample Status</label>
+                                <select id="monChiefSampleStatus" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remark -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Catatan / Remark</label>
+                        <textarea id="monRemark" rows="3" placeholder="Tambahkan catatan khusus terkait kendala atau kemajuan..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex justify-end space-x-3 pt-2">
+                        <button type="button" onclick="resetMonitoringForm()" class="px-5 py-2.5 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">Batal / Clear</button>
+                        <button type="submit" class="px-5 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm font-medium shadow-sm transition flex items-center space-x-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span>Simpan Data Monitoring</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= TAB: FORM INPUT OVERLINE ================= -->
+        <section id="tab-overline" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex items-center space-x-3 pb-4 mb-6 border-b border-slate-100">
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-lg">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Form Input Weekly Overline</h2>
+                        <p class="text-xs text-slate-500">Pencatatan kejadian line overline/keterlambatan pengoperasian.</p>
+                    </div>
+                </div>
+
+                <form id="formOverline" onsubmit="handleSaveOverline(event)" class="space-y-6">
+                    <input type="hidden" id="ovrId" value="">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Report Week Start -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Report Week Start *</label>
+                            <input type="date" id="ovrReportWeekStart" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Engineer -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Engineer PIC *</label>
+                            <select id="ovrEngineer" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">-- Pilih Engineer --</option>
+                            </select>
+                        </div>
+
+                        <!-- Line -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Line *</label>
+                            <select id="ovrLine" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">-- Pilih Line --</option>
+                            </select>
+                        </div>
+
+                        <!-- Planned Overline Date -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Planned Overline Date *</label>
+                            <input type="date" id="ovrPlannedOverlineDate" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Current Style -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Current Style</label>
+                            <input type="text" id="ovrCurrentStyle" placeholder="Current Style" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Next Style -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Next Style</label>
+                            <input type="text" id="ovrNextStyle" placeholder="Next Style" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Overline Status -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Overline Status *</label>
+                            <select id="ovrStatus" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                            </select>
+                        </div>
+
+                        <!-- Remark -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Catatan / Cause of Delay</label>
+                            <input type="text" id="ovrRemark" placeholder="Sebab keterlambatan line..." class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex justify-end space-x-3 pt-2">
+                        <button type="button" onclick="resetOverlineForm()" class="px-5 py-2.5 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium transition">Batal / Clear</button>
+                        <button type="submit" class="px-5 py-2.5 text-white bg-purple-600 hover:bg-purple-700 rounded-lg text-sm font-medium shadow-sm transition flex items-center space-x-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span>Simpan Data Overline</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= TAB: DATA RECORDS & ACTIONS ================= -->
+        <section id="tab-records" class="hidden space-y-6">
+
+            <!-- Sub Header Tools -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <button onclick="switchRecordSubTab('monitoring')" id="subtab-btn-monitoring" class="px-4 py-2 rounded-lg font-medium text-sm bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        Weekly Monitoring Data
+                    </button>
+                    <button onclick="switchRecordSubTab('overline')" id="subtab-btn-overline" class="px-4 py-2 rounded-lg font-medium text-sm text-slate-600 hover:bg-slate-100">
+                        Weekly Overline Data
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input type="text" id="recordSearchInput" onkeyup="renderTables()" placeholder="Cari data..." class="pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 w-44 sm:w-64">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+                    </div>
+
+                    <!-- Export/Import Actions -->
+                    <button onclick="exportToJSON()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center space-x-1" title="Ekspor JSON Backup">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Export JSON</span>
+                    </button>
+
+                    <label class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center space-x-1 cursor-pointer" title="Impor Data JSON">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        <span>Import JSON</span>
+                        <input type="file" id="importJsonInput" accept=".json" onchange="importFromJSON(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Monitoring Data Table -->
+            <div id="subtab-content-monitoring" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Tabel Monitoring Mingguan</h3>
+                    <span class="text-xs text-slate-500" id="monitoringCountText">Total: 0 Data</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Report Date</th>
+                                <th class="p-3">Engineer</th>
+                                <th class="p-3">Line</th>
+                                <th class="p-3">Current / Next Style</th>
+                                <th class="p-3">Planned Start</th>
+                                <th class="p-3">Days Left</th>
+                                <th class="p-3">Pre-Layout</th>
+                                <th class="p-3">PP Approval</th>
+                                <th class="p-3">Chief Sample</th>
+                                <th class="p-3">Status Line</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableMonitoringBody" class="divide-y divide-slate-100">
+                            <!-- Rows loaded by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Overline Data Table -->
+            <div id="subtab-content-overline" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Tabel Overline Line Mingguan</h3>
+                    <span class="text-xs text-slate-500" id="overlineCountText">Total: 0 Data</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Week Start</th>
+                                <th class="p-3">Engineer</th>
+                                <th class="p-3">Line</th>
+                                <th class="p-3">Current / Next Style</th>
+                                <th class="p-3">Planned Overline Date</th>
+                                <th class="p-3">Overline Status</th>
+                                <th class="p-3">Remark / Cause</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableOverlineBody" class="divide-y divide-slate-100">
+                            <!-- Rows loaded by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= TAB: USERS (ADMIN) ================= -->
+        <section id="tab-users" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex items-center space-x-3 pb-4 mb-6 border-b border-slate-100">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+                        <i data-lucide="user-plus" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Tambah User Baru</h2>
+                        <p class="text-xs text-slate-500">Hanya admin yang dapat menambah dan mengelola user.</p>
+                    </div>
+                </div>
+
+                <form id="formUser" onsubmit="handleCreateUser(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Lengkap</label>
+                            <input type="text" id="newUserName" placeholder="Nama user" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Email *</label>
+                            <input type="email" id="newUserEmail" required class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Password * (min. 6 karakter)</label>
+                            <input type="password" id="newUserPassword" required minlength="6" autocomplete="new-password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Role</label>
+                            <select id="newUserRole" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="px-5 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm font-medium shadow-sm transition flex items-center space-x-2">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            <span>Tambah User</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800">Daftar User</h3>
+                    <span class="text-xs text-slate-500" id="userCountText">Total: 0 User</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Nama</th>
+                                <th class="p-3">Email</th>
+                                <th class="p-3">Role</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableUsersBody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Custom Notification Toast -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-[60] bg-slate-800 text-white px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3 pointer-events-none">
+        <i data-lucide="check-circle" id="toastIcon" class="w-5 h-5 text-emerald-400"></i>
+        <span id="toastText" class="text-xs font-medium">Notifikasi</span>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // MASTER CONSTANTS & OPTIONS
+        const MASTER_ENGINEERS = [
+            "Viona Iswi Nurlestari",
+            "Aulia Darma Putra",
+            "Diva Nuratnika Rahayu",
+            "Jaka Muhammad Zaelani",
+            "Garnis Kirani",
+            "Hamidah Nur Wahdaniah",
+            "Mita Monika",
+            "Shalma Amelia"
+        ];
+
+        const MASTER_LINES = Array.from({ length: 31 }, (_, i) => `B${i + 1}`);
+        const MASTER_STATUS = ["Done", "In Progress", "Pending", "Not Started", "N/A"];
+
+        // SAMPLE DATA PRESETS (dipakai oleh tombol "Reset Demo" khusus admin)
+        const INITIAL_MONITORING_DATA = [
+            {
+                reportDate: "2026-11-01",
+                engineer: "Viona Iswi Nurlestari",
+                line: "B1",
+                currentStyle: "ST-BASIC-01",
+                nextStyle: "ST-JACKET-99",
+                plannedStartDate: "2026-11-10",
+                preLayoutStatus: "Done",
+                ppApprovalStatus: "Done",
+                chiefSampleStatus: "Done",
+                remark: "All preparation ready for style change."
+            },
+            {
+                reportDate: "2026-11-02",
+                engineer: "Aulia Darma Putra",
+                line: "B5",
+                currentStyle: "ST-SHIRT-11",
+                nextStyle: "ST-POLO-44",
+                plannedStartDate: "2026-11-08",
+                preLayoutStatus: "In Progress",
+                ppApprovalStatus: "Pending",
+                chiefSampleStatus: "Not Started",
+                remark: "Waiting PP Sample Approval from Buyer."
+            },
+            {
+                reportDate: "2026-11-03",
+                engineer: "Diva Nuratnika Rahayu",
+                line: "B12",
+                currentStyle: "ST-PANTS-88",
+                nextStyle: "ST-DENIM-02",
+                plannedStartDate: "2026-11-15",
+                preLayoutStatus: "Done",
+                ppApprovalStatus: "In Progress",
+                chiefSampleStatus: "Done",
+                remark: "Layout approved, chief sample complete."
+            },
+            {
+                reportDate: "2026-11-04",
+                engineer: "Jaka Muhammad Zaelani",
+                line: "B20",
+                currentStyle: "ST-VEST-03",
+                nextStyle: "ST-COAT-77",
+                plannedStartDate: "2026-11-05",
+                preLayoutStatus: "Not Started",
+                ppApprovalStatus: "Pending",
+                chiefSampleStatus: "Pending",
+                remark: "Critical delay in PP sample approval."
+            }
+        ];
+
+        const INITIAL_OVERLINE_DATA = [
+            {
+                reportWeekStart: "2026-11-01",
+                engineer: "Aulia Darma Putra",
+                line: "B5",
+                currentStyle: "ST-SHIRT-11",
+                nextStyle: "ST-POLO-44",
+                plannedOverlineDate: "2026-11-09",
+                status: "Pending",
+                remark: "Machine breakdown on main assembly."
+            },
+            {
+                reportWeekStart: "2026-11-01",
+                engineer: "Garnis Kirani",
+                line: "B18",
+                currentStyle: "ST-KIDS-01",
+                nextStyle: "ST-KIDS-02",
+                plannedOverlineDate: "2026-11-03",
+                status: "Done",
+                remark: "Resolved with extra technical support."
+            }
+        ];
+
+        // APP STATE
+        let monitoringList = [];
+        let overlineList = [];
+        let chartReadinessInstance = null;
+        let chartEngineerInstance = null;
+        let chartLineStatusInstance = null;
+        let activeRecordSubTab = 'monitoring';
+
+        // AUTH / SUPABASE STATE
+        let sb = null;
+        let currentSession = null;
+        let currentProfile = null;
+        let appStarted = false;
+
+        // ---------- HELPERS ----------
+        function esc(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function isAdmin() {
+            return currentProfile && currentProfile.role === 'admin';
+        }
+
+        // DB <-> APP MAPPING
+        function monFromDb(r) {
+            return {
+                id: r.id,
+                reportDate: r.report_date,
+                engineer: r.engineer,
+                line: r.line,
+                currentStyle: r.current_style || '-',
+                nextStyle: r.next_style || '-',
+                plannedStartDate: r.planned_start_date,
+                preLayoutStatus: r.pre_layout_status,
+                ppApprovalStatus: r.pp_approval_status,
+                chiefSampleStatus: r.chief_sample_status,
+                remark: r.remark || '-'
+            };
+        }
+        function monToDb(m) {
+            const o = {
+                report_date: m.reportDate,
+                engineer: m.engineer,
+                line: m.line,
+                current_style: m.currentStyle,
+                next_style: m.nextStyle,
+                planned_start_date: m.plannedStartDate,
+                pre_layout_status: m.preLayoutStatus,
+                pp_approval_status: m.ppApprovalStatus,
+                chief_sample_status: m.chiefSampleStatus,
+                remark: m.remark
+            };
+            if (m.id && !String(m.id).startsWith('mon-')) o.id = m.id;
+            return o;
+        }
+        function ovrFromDb(r) {
+            return {
+                id: r.id,
+                reportWeekStart: r.report_week_start,
+                engineer: r.engineer,
+                line: r.line,
+                currentStyle: r.current_style || '-',
+                nextStyle: r.next_style || '-',
+                plannedOverlineDate: r.planned_overline_date,
+                status: r.status,
+                remark: r.remark || '-'
+            };
+        }
+        function ovrToDb(o) {
+            const x = {
+                report_week_start: o.reportWeekStart,
+                engineer: o.engineer,
+                line: o.line,
+                current_style: o.currentStyle,
+                next_style: o.nextStyle,
+                planned_overline_date: o.plannedOverlineDate,
+                status: o.status,
+                remark: o.remark
+            };
+            if (o.id && !String(o.id).startsWith('ovr-')) x.id = o.id;
+            return x;
+        }
+
+        // INIT APP
+        window.onload = async function() {
+            lucide.createIcons();
+            initFormDropdowns();
+            setDefaultDates();
+            await initSupabase();
+        };
+
+        async function initSupabase() {
+            try {
+                const res = await fetch('/api/config');
+                const cfg = await res.json();
+                if (!cfg.url || !cfg.anonKey) throw new Error('Konfigurasi Supabase belum diatur (SUPABASE_URL / SUPABASE_ANON_KEY).');
+                sb = window.supabase.createClient(cfg.url, cfg.anonKey);
+            } catch (err) {
+                showLoginError(err.message || 'Gagal memuat konfigurasi.');
+                return;
+            }
+
+            const { data } = await sb.auth.getSession();
+            currentSession = data.session;
+            if (currentSession) await startApp();
+
+            sb.auth.onAuthStateChange(async (event, session) => {
+                currentSession = session;
+                if (event === 'SIGNED_OUT') {
+                    appStarted = false;
+                    showLogin();
+                }
+            });
+        }
+
+        // ---------- LOGIN / LOGOUT ----------
+        function showLoginError(msg) {
+            const el = document.getElementById('loginError');
+            el.innerText = msg;
+            el.classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('appHeader').classList.add('hidden');
+            document.getElementById('appMain').classList.add('hidden');
+            document.getElementById('loginPassword').value = '';
+            monitoringList = [];
+            overlineList = [];
+            currentProfile = null;
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            if (!sb) return showLoginError('Supabase belum siap. Periksa konfigurasi environment.');
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            document.getElementById('loginError').classList.add('hidden');
+
+            const { data, error } = await sb.auth.signInWithPassword({
+                email: document.getElementById('loginEmail').value.trim(),
+                password: document.getElementById('loginPassword').value
+            });
+            btn.disabled = false;
+
+            if (error) {
+                showLoginError('Login gagal: email atau password salah.');
+                return;
+            }
+            currentSession = data.session;
+            await startApp();
+        }
+
+        async function handleLogout() {
+            if (sb) await sb.auth.signOut();
+            showLogin();
+        }
+
+        async function startApp() {
+            if (appStarted) return;
+            appStarted = true;
+
+            // ambil profile / role
+            const uid = currentSession.user.id;
+            const { data: prof } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
+            currentProfile = prof || { id: uid, email: currentSession.user.email, role: 'user' };
+
+            document.getElementById('currentUserLabel').innerText = `${currentProfile.full_name || currentProfile.email} (${currentProfile.role})`;
+
+            // elemen khusus admin
+            ['nav-users', 'mob-nav-users', 'btnResetDemo'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', !isAdmin());
+            });
+
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+            document.getElementById('appMain').classList.remove('hidden');
+
+            await loadData();
+            switchTab('dashboard');
+            lucide.createIcons();
+        }
+
+        // DROPDOWN SETUP
+        function initFormDropdowns() {
+            const engOptionsHtml = MASTER_ENGINEERS.map(e => `<option value="${e}">${e}</option>`).join('');
+            const lineOptionsHtml = MASTER_LINES.map(l => `<option value="${l}">${l}</option>`).join('');
+            const statusOptionsHtml = MASTER_STATUS.map(s => `<option value="${s}">${s}</option>`).join('');
+
+            // Monitoring Dropdowns
+            document.getElementById('monEngineer').innerHTML += engOptionsHtml;
+            document.getElementById('monLine').innerHTML += lineOptionsHtml;
+            document.getElementById('monPreLayoutStatus').innerHTML = statusOptionsHtml;
+            document.getElementById('monPpApprovalStatus').innerHTML = statusOptionsHtml;
+            document.getElementById('monChiefSampleStatus').innerHTML = statusOptionsHtml;
+
+            // Overline Dropdowns
+            document.getElementById('ovrEngineer').innerHTML += engOptionsHtml;
+            document.getElementById('ovrLine').innerHTML += lineOptionsHtml;
+            document.getElementById('ovrStatus').innerHTML = statusOptionsHtml;
+
+            // Filter Dropdowns
+            document.getElementById('filterEngineer').innerHTML += engOptionsHtml;
+            document.getElementById('filterLine').innerHTML += lineOptionsHtml;
+        }
+
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('monReportDate').value = today;
+            document.getElementById('ovrReportWeekStart').value = today;
+        }
+
+        // SUPABASE DATA HANDLING
+        async function loadData() {
+            const [mon, ovr] = await Promise.all([
+                sb.from('monitoring').select('*').order('created_at', { ascending: false }),
+                sb.from('overline').select('*').order('created_at', { ascending: false })
+            ]);
+            if (mon.error) showToast('Gagal memuat data monitoring: ' + mon.error.message);
+            if (ovr.error) showToast('Gagal memuat data overline: ' + ovr.error.message);
+            monitoringList = (mon.data || []).map(monFromDb);
+            overlineList = (ovr.data || []).map(ovrFromDb);
+            renderDashboard();
+            renderTables();
+        }
+
+        async function resetToDefaultData() {
+            if (!isAdmin()) return;
+            if (!confirm("Reset akan MENGHAPUS SEMUA data di database dan menggantinya dengan data sampel. Lanjutkan?")) return;
+
+            const d1 = await sb.from('monitoring').delete().neq('id', '');
+            const d2 = await sb.from('overline').delete().neq('id', '');
+            if (d1.error || d2.error) return showToast("Gagal reset: " + ((d1.error || d2.error).message));
+
+            const i1 = await sb.from('monitoring').insert(INITIAL_MONITORING_DATA.map(monToDb));
+            const i2 = await sb.from('overline').insert(INITIAL_OVERLINE_DATA.map(ovrToDb));
+            if (i1.error || i2.error) return showToast("Gagal mengisi data sampel: " + ((i1.error || i2.error).message));
+
+            await loadData();
+            showToast("Data telah di-reset ke data sampel awal.");
+        }
+
+        // TAB NAVIGATION
+        function switchTab(tabId) {
+            ['dashboard', 'monitoring', 'overline', 'records', 'users'].forEach(id => {
+                const el = document.getElementById(`tab-${id}`);
+                const navBtn = document.getElementById(`nav-${id}`);
+                const mobNavBtn = document.getElementById(`mob-nav-${id}`);
+                const adminHidden = (id === 'users' && !isAdmin());
+
+                if (id === tabId && !adminHidden) {
+                    el.classList.remove('hidden');
+                    if(navBtn) {
+                        navBtn.className = "px-3 py-2 rounded-md text-sm font-medium transition flex items-center space-x-2 bg-indigo-800 text-white";
+                    }
+                    if(mobNavBtn) {
+                        mobNavBtn.className = "flex flex-col items-center p-2 text-white font-semibold";
+                    }
+                } else {
+                    el.classList.add('hidden');
+                    if(navBtn) {
+                        navBtn.className = "px-3 py-2 rounded-md text-sm font-medium transition flex items-center space-x-2 text-indigo-200 hover:bg-indigo-800 hover:text-white" + (adminHidden ? " hidden" : "");
+                    }
+                    if(mobNavBtn) {
+                        mobNavBtn.className = "flex flex-col items-center p-2 text-indigo-300" + (adminHidden ? " hidden" : "");
+                    }
+                }
+            });
+
+            if(tabId === 'dashboard') {
+                renderDashboard();
+            }
+            if(tabId === 'users' && isAdmin()) {
+                loadUsers();
+            }
+            lucide.createIcons();
+        }
+
+        function switchRecordSubTab(subTabId) {
+            activeRecordSubTab = subTabId;
+            const btnMon = document.getElementById('subtab-btn-monitoring');
+            const btnOvr = document.getElementById('subtab-btn-overline');
+            const contentMon = document.getElementById('subtab-content-monitoring');
+            const contentOvr = document.getElementById('subtab-content-overline');
+
+            if(subTabId === 'monitoring') {
+                btnMon.className = "px-4 py-2 rounded-lg font-medium text-sm bg-indigo-50 text-indigo-700 border border-indigo-200";
+                btnOvr.className = "px-4 py-2 rounded-lg font-medium text-sm text-slate-600 hover:bg-slate-100";
+                contentMon.classList.remove('hidden');
+                contentOvr.classList.add('hidden');
+            } else {
+                btnOvr.className = "px-4 py-2 rounded-lg font-medium text-sm bg-purple-50 text-purple-700 border border-purple-200";
+                btnMon.className = "px-4 py-2 rounded-lg font-medium text-sm text-slate-600 hover:bg-slate-100";
+                contentOvr.classList.remove('hidden');
+                contentMon.classList.add('hidden');
+            }
+        }
+
+        // HELPER FUNCTIONS FOR CALCULATIONS & STATUS
+        function calculateSummaryStatus(item) {
+            const statuses = [item.preLayoutStatus, item.ppApprovalStatus, item.chiefSampleStatus];
+            if (statuses.every(s => s === 'Done' || s === 'N/A')) {
+                return 'Ready';
+            } else if (statuses.includes('Pending') || statuses.includes('Not Started')) {
+                return 'At Risk';
+            } else {
+                return 'In Progress';
+            }
+        }
+
+        function calculateDaysToStart(reportDateStr, plannedDateStr) {
+            if (!reportDateStr || !plannedDateStr) return 0;
+            const start = new Date(reportDateStr);
+            const planned = new Date(plannedDateStr);
+            const diffTime = planned - start;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function calcDaysToStart() {
+            const rep = document.getElementById('monReportDate').value;
+            const plan = document.getElementById('monPlannedStartDate').value;
+            const days = calculateDaysToStart(rep, plan);
+            const display = document.getElementById('monDaysToStartDisplay');
+            if (isNaN(days)) {
+                display.innerText = "0 Hari";
+            } else {
+                display.innerText = `${days} Hari lagi`;
+            }
+        }
+
+        // FORM HANDLERS
+        async function handleSaveMonitoring(e) {
+            e.preventDefault();
+            const existingId = document.getElementById('monId').value;
+            const newData = {
+                id: existingId || undefined,
+                reportDate: document.getElementById('monReportDate').value,
+                engineer: document.getElementById('monEngineer').value,
+                line: document.getElementById('monLine').value,
+                currentStyle: document.getElementById('monCurrentStyle').value || '-',
+                nextStyle: document.getElementById('monNextStyle').value || '-',
+                plannedStartDate: document.getElementById('monPlannedStartDate').value,
+                preLayoutStatus: document.getElementById('monPreLayoutStatus').value,
+                ppApprovalStatus: document.getElementById('monPpApprovalStatus').value,
+                chiefSampleStatus: document.getElementById('monChiefSampleStatus').value,
+                remark: document.getElementById('monRemark').value || '-'
+            };
+
+            let error;
+            if (existingId) {
+                ({ error } = await sb.from('monitoring').update(monToDb(newData)).eq('id', existingId));
+            } else {
+                ({ error } = await sb.from('monitoring').insert(monToDb(newData)));
+            }
+            if (error) return showToast("Gagal menyimpan: " + error.message);
+
+            showToast(existingId ? "Data Monitoring berhasil diperbarui." : "Data Monitoring baru berhasil ditambahkan.");
+            await loadData();
+            resetMonitoringForm();
+            switchTab('records');
+            switchRecordSubTab('monitoring');
+        }
+
+        function resetMonitoringForm() {
+            document.getElementById('formMonitoring').reset();
+            document.getElementById('monId').value = '';
+            setDefaultDates();
+            document.getElementById('monDaysToStartDisplay').innerText = "0 Hari";
+        }
+
+        async function handleSaveOverline(e) {
+            e.preventDefault();
+            const existingId = document.getElementById('ovrId').value;
+            const newData = {
+                id: existingId || undefined,
+                reportWeekStart: document.getElementById('ovrReportWeekStart').value,
+                engineer: document.getElementById('ovrEngineer').value,
+                line: document.getElementById('ovrLine').value,
+                currentStyle: document.getElementById('ovrCurrentStyle').value || '-',
+                nextStyle: document.getElementById('ovrNextStyle').value || '-',
+                plannedOverlineDate: document.getElementById('ovrPlannedOverlineDate').value,
+                status: document.getElementById('ovrStatus').value,
+                remark: document.getElementById('ovrRemark').value || '-'
+            };
+
+            let error;
+            if (existingId) {
+                ({ error } = await sb.from('overline').update(ovrToDb(newData)).eq('id', existingId));
+            } else {
+                ({ error } = await sb.from('overline').insert(ovrToDb(newData)));
+            }
+            if (error) return showToast("Gagal menyimpan: " + error.message);
+
+            showToast(existingId ? "Data Overline berhasil diperbarui." : "Data Overline baru berhasil ditambahkan.");
+            await loadData();
+            resetOverlineForm();
+            switchTab('records');
+            switchRecordSubTab('overline');
+        }
+
+        function resetOverlineForm() {
+            document.getElementById('formOverline').reset();
+            document.getElementById('ovrId').value = '';
+            setDefaultDates();
+        }
+
+        function editMonitoring(id) {
+            const item = monitoringList.find(m => m.id === id);
+            if(!item) return;
+
+            document.getElementById('monId').value = item.id;
+            document.getElementById('monReportDate').value = item.reportDate;
+            document.getElementById('monEngineer').value = item.engineer;
+            document.getElementById('monLine').value = item.line;
+            document.getElementById('monCurrentStyle').value = item.currentStyle;
+            document.getElementById('monNextStyle').value = item.nextStyle;
+            document.getElementById('monPlannedStartDate').value = item.plannedStartDate;
+            document.getElementById('monPreLayoutStatus').value = item.preLayoutStatus;
+            document.getElementById('monPpApprovalStatus').value = item.ppApprovalStatus;
+            document.getElementById('monChiefSampleStatus').value = item.chiefSampleStatus;
+            document.getElementById('monRemark').value = item.remark;
+
+            calcDaysToStart();
+            switchTab('monitoring');
+        }
+
+        async function deleteMonitoring(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus data monitoring ini?")) {
+                const { error } = await sb.from('monitoring').delete().eq('id', id);
+                if (error) return showToast("Gagal menghapus: " + error.message);
+                await loadData();
+                showToast("Data Monitoring berhasil dihapus.");
+            }
+        }
+
+        function editOverline(id) {
+            const item = overlineList.find(o => o.id === id);
+            if(!item) return;
+
+            document.getElementById('ovrId').value = item.id;
+            document.getElementById('ovrReportWeekStart').value = item.reportWeekStart;
+            document.getElementById('ovrEngineer').value = item.engineer;
+            document.getElementById('ovrLine').value = item.line;
+            document.getElementById('ovrCurrentStyle').value = item.currentStyle;
+            document.getElementById('ovrNextStyle').value = item.nextStyle;
+            document.getElementById('ovrPlannedOverlineDate').value = item.plannedOverlineDate;
+            document.getElementById('ovrStatus').value = item.status;
+            document.getElementById('ovrRemark').value = item.remark;
+
+            switchTab('overline');
+        }
+
+        async function deleteOverline(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus data overline ini?")) {
+                const { error } = await sb.from('overline').delete().eq('id', id);
+                if (error) return showToast("Gagal menghapus: " + error.message);
+                await loadData();
+                showToast("Data Overline berhasil dihapus.");
+            }
+        }
+
+        // RENDER TABLES
+        function renderTables() {
+            const searchQuery = (document.getElementById('recordSearchInput').value || '').toLowerCase();
+
+            // Render Monitoring Table
+            const filteredMon = monitoringList.filter(item => {
+                return item.engineer.toLowerCase().includes(searchQuery) ||
+                       item.line.toLowerCase().includes(searchQuery) ||
+                       item.currentStyle.toLowerCase().includes(searchQuery) ||
+                       item.nextStyle.toLowerCase().includes(searchQuery) ||
+                       item.remark.toLowerCase().includes(searchQuery);
+            });
+
+            document.getElementById('monitoringCountText').innerText = `Total: ${filteredMon.length} Data`;
+            const tbodyMon = document.getElementById('tableMonitoringBody');
+            
+            if (filteredMon.length === 0) {
+                tbodyMon.innerHTML = `<tr><td colspan="11" class="text-center py-6 text-slate-400">Tidak ada data monitoring ditemukan</td></tr>`;
+            } else {
+                tbodyMon.innerHTML = filteredMon.map(item => {
+                    const daysLeft = calculateDaysToStart(item.reportDate, item.plannedStartDate);
+                    const overall = calculateSummaryStatus(item);
+
+                    let statusBadge = '';
+                    if (overall === 'Ready') statusBadge = `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-emerald-100 text-emerald-700">Ready</span>`;
+                    else if (overall === 'At Risk') statusBadge = `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-rose-100 text-rose-700">At Risk</span>`;
+                    else statusBadge = `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-amber-100 text-amber-700">In Progress</span>`;
+
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 font-medium text-slate-700">${esc(item.reportDate)}</td>
+                            <td class="p-3 font-medium">${esc(item.engineer)}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-bold">${esc(item.line)}</span></td>
+                            <td class="p-3">
+                                <div class="text-slate-800 font-semibold">${esc(item.nextStyle)}</div>
+                                <div class="text-slate-400 text-[10px]">Curr: ${esc(item.currentStyle)}</div>
+                            </td>
+                            <td class="p-3">${esc(item.plannedStartDate)}</td>
+                            <td class="p-3 font-semibold ${daysLeft < 3 ? 'text-rose-600' : 'text-slate-700'}">${daysLeft} hr</td>
+                            <td class="p-3">${formatMiniBadge(item.preLayoutStatus)}</td>
+                            <td class="p-3">${formatMiniBadge(item.ppApprovalStatus)}</td>
+                            <td class="p-3">${formatMiniBadge(item.chiefSampleStatus)}</td>
+                            <td class="p-3">${statusBadge}</td>
+                            <td class="p-3 text-center">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <button onclick="editMonitoring('${esc(item.id)}')" class="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Edit"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                    <button onclick="deleteMonitoring('${esc(item.id)}')" class="p-1 text-rose-600 hover:bg-rose-50 rounded" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Render Overline Table
+            const filteredOvr = overlineList.filter(item => {
+                return item.engineer.toLowerCase().includes(searchQuery) ||
+                       item.line.toLowerCase().includes(searchQuery) ||
+                       item.currentStyle.toLowerCase().includes(searchQuery) ||
+                       item.nextStyle.toLowerCase().includes(searchQuery) ||
+                       item.remark.toLowerCase().includes(searchQuery);
+            });
+
+            document.getElementById('overlineCountText').innerText = `Total: ${filteredOvr.length} Data`;
+            const tbodyOvr = document.getElementById('tableOverlineBody');
+
+            if (filteredOvr.length === 0) {
+                tbodyOvr.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-400">Tidak ada data overline ditemukan</td></tr>`;
+            } else {
+                tbodyOvr.innerHTML = filteredOvr.map(item => {
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 font-medium text-slate-700">${esc(item.reportWeekStart)}</td>
+                            <td class="p-3 font-medium">${esc(item.engineer)}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold">${esc(item.line)}</span></td>
+                            <td class="p-3">
+                                <div class="text-slate-800 font-semibold">${esc(item.nextStyle)}</div>
+                                <div class="text-slate-400 text-[10px]">Curr: ${esc(item.currentStyle)}</div>
+                            </td>
+                            <td class="p-3">${esc(item.plannedOverlineDate)}</td>
+                            <td class="p-3">${formatMiniBadge(item.status)}</td>
+                            <td class="p-3 text-slate-600 max-w-xs truncate">${esc(item.remark)}</td>
+                            <td class="p-3 text-center">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <button onclick="editOverline('${esc(item.id)}')" class="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Edit"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                    <button onclick="deleteOverline('${esc(item.id)}')" class="p-1 text-rose-600 hover:bg-rose-50 rounded" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            lucide.createIcons();
+        }
+
+        function formatMiniBadge(status) {
+            switch(status) {
+                case 'Done': return `<span class="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-800 font-medium rounded">Done</span>`;
+                case 'In Progress': return `<span class="text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-800 font-medium rounded">In Progress</span>`;
+                case 'Pending': return `<span class="text-[10px] px-1.5 py-0.5 bg-rose-100 text-rose-800 font-medium rounded">Pending</span>`;
+                case 'Not Started': return `<span class="text-[10px] px-1.5 py-0.5 bg-slate-200 text-slate-700 font-medium rounded">Not Started</span>`;
+                default: return `<span class="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 font-medium rounded">N/A</span>`;
+            }
+        }
+
+        // RENDER DASHBOARD & VISUALIZATIONS
+        function clearDashboardFilters() {
+            document.getElementById('filterEngineer').value = 'ALL';
+            document.getElementById('filterLine').value = 'ALL';
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            const selectedEng = document.getElementById('filterEngineer').value;
+            const selectedLine = document.getElementById('filterLine').value;
+
+            // Filter datasets
+            let filteredMon = monitoringList.filter(item => {
+                const matchEng = (selectedEng === 'ALL' || item.engineer === selectedEng);
+                const matchLine = (selectedLine === 'ALL' || item.line === selectedLine);
+                return matchEng && matchLine;
+            });
+
+            let filteredOvr = overlineList.filter(item => {
+                const matchEng = (selectedEng === 'ALL' || item.engineer === selectedEng);
+                const matchLine = (selectedLine === 'ALL' || item.line === selectedLine);
+                return matchEng && matchLine;
+            });
+
+            // Calculate Metrics
+            let readyCount = 0;
+            let inProgressCount = 0;
+            let atRiskCount = 0;
+
+            filteredMon.forEach(m => {
+                const summary = calculateSummaryStatus(m);
+                if (summary === 'Ready') readyCount++;
+                else if (summary === 'At Risk') atRiskCount++;
+                else inProgressCount++;
+            });
+
+            const totalLinesMonitored = filteredMon.length;
+            const readyPct = totalLinesMonitored > 0 ? Math.round((readyCount / totalLinesMonitored) * 100) : 0;
+
+            // Set KPI Values
+            document.getElementById('kpi-total-lines').innerText = totalLinesMonitored;
+            document.getElementById('kpi-ready').innerText = readyCount;
+            document.getElementById('kpi-ready-pct').innerText = `${readyPct}% dari Terjadwal`;
+            document.getElementById('kpi-in-progress').innerText = inProgressCount;
+            document.getElementById('kpi-at-risk').innerText = atRiskCount;
+            document.getElementById('kpi-overlines').innerText = filteredOvr.length;
+
+            // Render Charts
+            renderReadinessChart(readyCount, inProgressCount, atRiskCount);
+            renderEngineerChart(filteredMon);
+            renderLineStatusChart(filteredMon);
+        }
+
+        // CHART 1: Readiness Doughnut
+        function renderReadinessChart(ready, progress, risk) {
+            const ctx = document.getElementById('chartReadiness').getContext('2d');
+            if (chartReadinessInstance) chartReadinessInstance.destroy();
+
+            chartReadinessInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ready', 'In Progress', 'At Risk'],
+                    datasets: [{
+                        data: [ready, progress, risk],
+                        backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // CHART 2: Engineer Performance Stacked Bar
+        function renderEngineerChart(monData) {
+            const ctx = document.getElementById('chartEngineer').getContext('2d');
+            if (chartEngineerInstance) chartEngineerInstance.destroy();
+
+            const engStats = {};
+            MASTER_ENGINEERS.forEach(eng => {
+                engStats[eng] = { ready: 0, progress: 0, risk: 0 };
+            });
+
+            monData.forEach(item => {
+                if (engStats[item.engineer]) {
+                    const st = calculateSummaryStatus(item);
+                    if (st === 'Ready') engStats[item.engineer].ready++;
+                    else if (st === 'At Risk') engStats[item.engineer].risk++;
+                    else engStats[item.engineer].progress++;
+                }
+            });
+
+            const labels = MASTER_ENGINEERS.map(name => name.split(' ')[0]); // Display first name for clean layout
+            const readyData = MASTER_ENGINEERS.map(e => engStats[e].ready);
+            const progressData = MASTER_ENGINEERS.map(e => engStats[e].progress);
+            const riskData = MASTER_ENGINEERS.map(e => engStats[e].risk);
+
+            chartEngineerInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Ready', data: readyData, backgroundColor: '#10b981' },
+                        { label: 'In Progress', data: progressData, backgroundColor: '#f59e0b' },
+                        { label: 'At Risk', data: riskData, backgroundColor: '#f43f5e' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, ticks: { stepSize: 1 } }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // CHART 3: Line Status Grid Overview (B1 - B31)
+        function renderLineStatusChart(monData) {
+            const ctx = document.getElementById('chartLineStatus').getContext('2d');
+            if (chartLineStatusInstance) chartLineStatusInstance.destroy();
+
+            // Prepare B1 to B31 scores
+            // Score values for visual bar height: Pre-layout (1), PP Approval (1), Chief Sample (1) -> Max 3
+            const lineLabels = MASTER_LINES;
+            const lineScores = lineLabels.map(lineId => {
+                const match = monData.find(m => m.line === lineId);
+                if (!match) return 0;
+                
+                let score = 0;
+                if (match.preLayoutStatus === 'Done' || match.preLayoutStatus === 'N/A') score += 1;
+                if (match.ppApprovalStatus === 'Done' || match.ppApprovalStatus === 'N/A') score += 1;
+                if (match.chiefSampleStatus === 'Done' || match.chiefSampleStatus === 'N/A') score += 1;
+                return score;
+            });
+
+            const backgroundColors = lineScores.map(score => {
+                if (score === 3) return '#10b981'; // Green Ready
+                if (score === 0) return '#e2e8f0'; // Gray No Data
+                if (score === 1) return '#f43f5e'; // Red Critical
+                return '#f59e0b'; // Yellow In progress
+            });
+
+            chartLineStatusInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: lineLabels,
+                    datasets: [{
+                        label: 'Tahapan Selesai (Max 3)',
+                        data: lineScores,
+                        backgroundColor: backgroundColors,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 3, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // EXPORT / IMPORT JSON
+        function exportToJSON() {
+            const exportObj = {
+                monitoring: monitoringList,
+                overline: overlineList,
+                exportDate: new Date().toISOString()
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `HOGA_B_Monitoring_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Export data berhasil diunduh.");
+        }
+
+        function importFromJSON(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = async function(e) {
+                try {
+                    const importedObj = JSON.parse(e.target.result);
+                    let err = null;
+                    if (importedObj.monitoring && Array.isArray(importedObj.monitoring) && importedObj.monitoring.length) {
+                        // id lama dibuang agar database membuat id baru (tidak bentrok)
+                        const rows = importedObj.monitoring.map(m => { const d = monToDb({ ...m, id: undefined }); return d; });
+                        const r = await sb.from('monitoring').insert(rows);
+                        if (r.error) err = r.error;
+                    }
+                    if (!err && importedObj.overline && Array.isArray(importedObj.overline) && importedObj.overline.length) {
+                        const rows = importedObj.overline.map(o => ovrToDb({ ...o, id: undefined }));
+                        const r = await sb.from('overline').insert(rows);
+                        if (r.error) err = r.error;
+                    }
+                    if (err) throw err;
+                    await loadData();
+                    showToast("Import data JSON berhasil ditambahkan ke database.");
+                } catch(err) {
+                    alert("Gagal mengimpor file: " + (err.message || "Format JSON tidak valid."));
+                }
+            };
+            if(event.target.files[0]) {
+                fileReader.readAsText(event.target.files[0]);
+            }
+            event.target.value = '';
+        }
+
+        // ---------- USER MANAGEMENT (ADMIN) ----------
+        async function callUsersApi(method, body, query = '') {
+            const { data } = await sb.auth.getSession();
+            const token = data.session ? data.session.access_token : '';
+            const res = await fetch('/api/users' + query, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(json.error || 'Permintaan gagal.');
+            return json;
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('tableUsersBody');
+            try {
+                const users = await callUsersApi('GET');
+                document.getElementById('userCountText').innerText = `Total: ${users.length} User`;
+                if (!users.length) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">Belum ada user</td></tr>`;
+                    return;
+                }
+                tbody.innerHTML = users.map(u => {
+                    const self = u.id === currentSession.user.id;
+                    const roleBadge = u.role === 'admin'
+                        ? `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-indigo-100 text-indigo-700">Admin</span>`
+                        : `<span class="px-2 py-0.5 text-xs font-semibold rounded bg-slate-100 text-slate-600">User</span>`;
+                    return `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 font-medium text-slate-700">${esc(u.full_name || '-')}</td>
+                            <td class="p-3">${esc(u.email)}</td>
+                            <td class="p-3">${roleBadge}</td>
+                            <td class="p-3 text-center">
+                                ${self ? '<span class="text-slate-400">Akun Anda</span>' : `
+                                <div class="flex items-center justify-center space-x-2">
+                                    <button onclick="toggleUserRole('${esc(u.id)}','${u.role === 'admin' ? 'user' : 'admin'}')" class="px-2 py-1 text-blue-600 hover:bg-blue-50 rounded text-[11px] font-medium">Jadikan ${u.role === 'admin' ? 'User' : 'Admin'}</button>
+                                    <button onclick="deleteUser('${esc(u.id)}')" class="p-1 text-rose-600 hover:bg-rose-50 rounded" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>`}
+                            </td>
+                        </tr>`;
+                }).join('');
+                lucide.createIcons();
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-rose-500">${esc(err.message)}</td></tr>`;
+            }
+        }
+
+        async function handleCreateUser(e) {
+            e.preventDefault();
+            try {
+                await callUsersApi('POST', {
+                    full_name: document.getElementById('newUserName').value.trim(),
+                    email: document.getElementById('newUserEmail').value.trim(),
+                    password: document.getElementById('newUserPassword').value,
+                    role: document.getElementById('newUserRole').value
+                });
+                document.getElementById('formUser').reset();
+                showToast("User baru berhasil ditambahkan.");
+                loadUsers();
+            } catch (err) {
+                showToast(err.message);
+            }
+        }
+
+        async function toggleUserRole(id, role) {
+            try {
+                await callUsersApi('PATCH', { id, role });
+                showToast("Role user diperbarui.");
+                loadUsers();
+            } catch (err) { showToast(err.message); }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm("Hapus user ini? Aksi tidak dapat dibatalkan.")) return;
+            try {
+                await callUsersApi('DELETE', null, '?id=' + encodeURIComponent(id));
+                showToast("User berhasil dihapus.");
+                loadUsers();
+            } catch (err) { showToast(err.message); }
+        }
+
+        // NOTIFICATION TOAST
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            const toastText = document.getElementById('toastText');
+            toastText.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
