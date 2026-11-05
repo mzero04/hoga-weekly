@@ -42,7 +42,7 @@
                 <h2 class="text-lg font-bold text-slate-800">Login</h2>
                 <p class="text-xs text-slate-500 mb-5">Masuk dengan akun yang diberikan oleh admin.</p>
 
-                <form id="formLogin" onsubmit="handleLogin(event)" class="space-y-4">
+                <form id="formLogin" method="post" action="#" onsubmit="event.preventDefault(); handleLogin(event); return false;" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Email</label>
                         <input type="email" id="loginEmail" required autocomplete="username" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
@@ -275,7 +275,7 @@
                     </div>
                 </div>
 
-                <form id="formMonitoring" onsubmit="handleSaveMonitoring(event)" class="space-y-6">
+                <form id="formMonitoring" method="post" action="#" onsubmit="event.preventDefault(); handleSaveMonitoring(event); return false;" class="space-y-6">
                     <input type="hidden" id="monId" value="">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,7 +384,7 @@
                     </div>
                 </div>
 
-                <form id="formOverline" onsubmit="handleSaveOverline(event)" class="space-y-6">
+                <form id="formOverline" method="post" action="#" onsubmit="event.preventDefault(); handleSaveOverline(event); return false;" class="space-y-6">
                     <input type="hidden" id="ovrId" value="">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -565,11 +565,11 @@
                     </div>
                 </div>
 
-                <form id="formUser" onsubmit="handleCreateUser(event)" class="space-y-6">
+                <form id="formUser" method="post" action="#" onsubmit="event.preventDefault(); handleCreateUser(event); return false;" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Lengkap</label>
-                            <input type="text" id="newUserName" placeholder="Nama user" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="text" id="newUserName" list="engineerList" placeholder="Samakan dengan nama Engineer" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Email *</label>
@@ -587,6 +587,7 @@
                             </select>
                         </div>
                     </div>
+                    <datalist id="engineerList"></datalist>
                     <div class="flex justify-end pt-2">
                         <button type="submit" class="px-5 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-sm font-medium shadow-sm transition flex items-center space-x-2">
                             <i data-lucide="user-plus" class="w-4 h-4"></i>
@@ -636,8 +637,9 @@
             "Garnis Kirani",
             "Hamidah Nur Wahdaniah",
             "Mita Monika",
-            "Shalma Amelia".
+            "Shalma Amelia",
             "Rifqi Ikhsan",
+            "Rizma Nurhasna Fauziyah",
             "Virgiawan Ramadhan"
         ];
 
@@ -734,12 +736,43 @@
         let appStarted = false;
 
         // ---------- HELPERS ----------
+        function safeIcons() {
+            try { if (window.lucide) lucide.createIcons(); } catch (e) { console.warn('lucide gagal:', e); }
+        }
+
         function esc(v) {
             return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
 
         function isAdmin() {
             return currentProfile && currentProfile.role === 'admin';
+        }
+
+        // Cocokkan nama akun yang login dengan daftar Engineer.
+        // 1) nama lengkap sama persis (tanpa peduli huruf besar/kecil), 2) nama depan unik.
+        function getMyEngineer() {
+            if (!currentProfile || !currentProfile.full_name) return '';
+            const name = currentProfile.full_name.trim().toLowerCase();
+            if (!name) return '';
+            const exact = MASTER_ENGINEERS.find(e => e.toLowerCase() === name);
+            if (exact) return exact;
+            const first = name.split(/\s+/)[0];
+            const byFirst = MASTER_ENGINEERS.filter(e => e.toLowerCase().split(' ')[0] === first);
+            return byFirst.length === 1 ? byFirst[0] : '';
+        }
+
+        // Isi otomatis Engineer PIC sesuai akun. User biasa dikunci ke namanya sendiri; admin tetap bisa memilih.
+        function applyDefaultEngineer() {
+            const mine = getMyEngineer();
+            const lock = !!mine && !isAdmin();
+            ['monEngineer', 'ovrEngineer'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.disabled = lock;
+                el.classList.toggle('opacity-70', lock);
+                el.classList.toggle('cursor-not-allowed', lock);
+                el.value = mine || '';
+            });
         }
 
         // DB <-> APP MAPPING
@@ -804,14 +837,14 @@
 
         // INIT APP
         window.onload = async function() {
-            lucide.createIcons();
-            initFormDropdowns();
-            setDefaultDates();
-            await initSupabase();
+            safeIcons();
+            try { initFormDropdowns(); setDefaultDates(); } catch (e) { console.error(e); }
+            try { await initSupabase(); } catch (e) { console.error(e); showLoginError('Gagal memulai aplikasi: ' + (e.message || e)); }
         };
 
         async function initSupabase() {
             try {
+                if (!window.supabase || !window.supabase.createClient) throw new Error('Library Supabase gagal dimuat. Periksa koneksi internet / ad blocker lalu refresh.');
                 const res = await fetch('/api/config');
                 const cfg = await res.json();
                 if (!cfg.url || !cfg.anonKey) throw new Error('Konfigurasi Supabase belum diatur (SUPABASE_URL / SUPABASE_ANON_KEY).');
@@ -865,11 +898,19 @@
             btn.disabled = false;
 
             if (error) {
-                showLoginError('Login gagal: email atau password salah.');
+                const m = (error.message || '').toLowerCase();
+                showLoginError(m.includes('invalid login') ? 'Login gagal: email atau password salah.' : 'Login gagal: ' + error.message);
                 return;
             }
             currentSession = data.session;
-            await startApp();
+            try {
+                await startApp();
+            } catch (err) {
+                console.error(err);
+                appStarted = false;
+                showLogin();
+                showLoginError('Berhasil login, tetapi gagal memuat aplikasi: ' + (err.message || err));
+            }
         }
 
         async function handleLogout() {
@@ -886,6 +927,7 @@
             const { data: prof } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
             currentProfile = prof || { id: uid, email: currentSession.user.email, role: 'user' };
 
+            applyDefaultEngineer();
             document.getElementById('currentUserLabel').innerText = `${currentProfile.full_name || currentProfile.email} (${currentProfile.role})`;
 
             // elemen khusus admin
@@ -900,7 +942,7 @@
 
             await loadData();
             switchTab('dashboard');
-            lucide.createIcons();
+            safeIcons();
         }
 
         // DROPDOWN SETUP
@@ -921,6 +963,8 @@
             document.getElementById('ovrLine').innerHTML += lineOptionsHtml;
             document.getElementById('ovrStatus').innerHTML = statusOptionsHtml;
 
+            document.getElementById('engineerList').innerHTML = MASTER_ENGINEERS.map(e => `<option value="${e}"></option>`).join('');
+
             // Filter Dropdowns
             document.getElementById('filterEngineer').innerHTML += engOptionsHtml;
             document.getElementById('filterLine').innerHTML += lineOptionsHtml;
@@ -930,6 +974,7 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('monReportDate').value = today;
             document.getElementById('ovrReportWeekStart').value = today;
+            applyDefaultEngineer();
         }
 
         // SUPABASE DATA HANDLING
@@ -995,7 +1040,7 @@
             if(tabId === 'users' && isAdmin()) {
                 loadUsers();
             }
-            lucide.createIcons();
+            safeIcons();
         }
 
         function switchRecordSubTab(subTabId) {
@@ -1270,7 +1315,7 @@
                 }).join('');
             }
 
-            lucide.createIcons();
+            safeIcons();
         }
 
         function formatMiniBadge(status) {
@@ -1653,7 +1698,7 @@
                             </td>
                         </tr>`;
                 }).join('');
-                lucide.createIcons();
+                safeIcons();
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-rose-500">${esc(err.message)}</td></tr>`;
             }
