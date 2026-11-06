@@ -501,18 +501,18 @@
                     <table class="w-full text-left text-xs text-slate-600">
                         <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
                             <tr>
-                                <th class="p-3">Report Date</th>
-                                <th class="p-3">Engineer</th>
-                                <th class="p-3">Line</th>
-                                <th class="p-3">Current Style</th>
-                                <th class="p-3">Next Style</th>
-                                <th class="p-3">Planned Start</th>
-                                <th class="p-3">Days Left</th>
-                                <th class="p-3">Pre-Layout</th>
-                                <th class="p-3">PP Approval</th>
-                                <th class="p-3">Chief Sample</th>
-                                <th class="p-3">Status Line</th>
-                                <th class="p-3">Catatan / Remark</th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="reportDate" onclick="setSort('mon','reportDate')" title="Klik untuk mengurutkan">Report Date<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="engineer" onclick="setSort('mon','engineer')" title="Klik untuk mengurutkan">Engineer<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="line" onclick="setSort('mon','line')" title="Klik untuk mengurutkan">Line<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="currentStyle" onclick="setSort('mon','currentStyle')" title="Klik untuk mengurutkan">Current Style<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="nextStyle" onclick="setSort('mon','nextStyle')" title="Klik untuk mengurutkan">Next Style<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="plannedStartDate" onclick="setSort('mon','plannedStartDate')" title="Klik untuk mengurutkan">Planned Start<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="daysLeft" onclick="setSort('mon','daysLeft')" title="Klik untuk mengurutkan">Days Left<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="preLayoutStatus" onclick="setSort('mon','preLayoutStatus')" title="Klik untuk mengurutkan">Pre-Layout<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="ppApprovalStatus" onclick="setSort('mon','ppApprovalStatus')" title="Klik untuk mengurutkan">PP Approval<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="chiefSampleStatus" onclick="setSort('mon','chiefSampleStatus')" title="Klik untuk mengurutkan">Chief Sample<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="summary" onclick="setSort('mon','summary')" title="Klik untuk mengurutkan">Status Line<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="mon" data-sort-key="remark" onclick="setSort('mon','remark')" title="Klik untuk mengurutkan">Catatan / Remark<span class="sort-ind ml-1 text-slate-400"></span></th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -533,14 +533,14 @@
                     <table class="w-full text-left text-xs text-slate-600">
                         <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
                             <tr>
-                                <th class="p-3">Week Start</th>
-                                <th class="p-3">Engineer</th>
-                                <th class="p-3">Line</th>
-                                <th class="p-3">Current Style</th>
-                                <th class="p-3">Next Style</th>
-                                <th class="p-3">Planned Overline Date</th>
-                                <th class="p-3">Overline Status</th>
-                                <th class="p-3">Remark / Cause</th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="reportWeekStart" onclick="setSort('ovr','reportWeekStart')" title="Klik untuk mengurutkan">Week Start<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="engineer" onclick="setSort('ovr','engineer')" title="Klik untuk mengurutkan">Engineer<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="line" onclick="setSort('ovr','line')" title="Klik untuk mengurutkan">Line<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="currentStyle" onclick="setSort('ovr','currentStyle')" title="Klik untuk mengurutkan">Current Style<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="nextStyle" onclick="setSort('ovr','nextStyle')" title="Klik untuk mengurutkan">Next Style<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="plannedOverlineDate" onclick="setSort('ovr','plannedOverlineDate')" title="Klik untuk mengurutkan">Planned Overline Date<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="status" onclick="setSort('ovr','status')" title="Klik untuk mengurutkan">Overline Status<span class="sort-ind ml-1 text-slate-400"></span></th>
+                                <th class="p-3 cursor-pointer select-none hover:bg-slate-200 whitespace-nowrap" data-sort-table="ovr" data-sort-key="remark" onclick="setSort('ovr','remark')" title="Klik untuk mengurutkan">Remark / Cause<span class="sort-ind ml-1 text-slate-400"></span></th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -1228,17 +1228,58 @@
         }
 
         // RENDER TABLES
+        // ---------- SORTING ----------
+        const sortState = { mon: { key: null, dir: 'asc' }, ovr: { key: null, dir: 'asc' } };
+
+        function sortValue(table, item, key) {
+            if (key === 'line') return parseInt(String(item.line).replace(/\D/g, ''), 10) || 0;
+            if (key === 'daysLeft') return calculateDaysToStart(item.reportDate, item.plannedStartDate);
+            if (key === 'summary') return ['Ready', 'In Progress', 'At Risk'].indexOf(calculateSummaryStatus(item));
+            if (key === 'chiefSampleStatus') return chiefLabel(item.chiefSampleStatus) === 'O' ? 1 : 0;
+            if (['preLayoutStatus', 'ppApprovalStatus', 'status'].includes(key)) return MASTER_STATUS.indexOf(item[key]);
+            return String(item[key] ?? '').toLowerCase();
+        }
+
+        function sortList(table, list) {
+            const st = sortState[table];
+            if (!st.key) return list;
+            const dir = st.dir === 'asc' ? 1 : -1;
+            return [...list].sort((a, b) => {
+                const x = sortValue(table, a, st.key), y = sortValue(table, b, st.key);
+                if (typeof x === 'number' && typeof y === 'number') return (x - y) * dir;
+                return String(x).localeCompare(String(y), 'id', { numeric: true }) * dir;
+            });
+        }
+
+        // Klik 1x: A→Z / kecil→besar, 2x: Z→A, 3x: kembali ke urutan awal
+        function setSort(table, key) {
+            const st = sortState[table];
+            if (st.key !== key) { st.key = key; st.dir = 'asc'; }
+            else if (st.dir === 'asc') { st.dir = 'desc'; }
+            else { st.key = null; st.dir = 'asc'; }
+            renderTables();
+        }
+
+        function updateSortIndicators() {
+            document.querySelectorAll('th[data-sort-table]').forEach(th => {
+                const st = sortState[th.dataset.sortTable];
+                const active = st.key === th.dataset.sortKey;
+                th.querySelector('.sort-ind').textContent = active ? (st.dir === 'asc' ? '▲' : '▼') : '↕';
+                th.classList.toggle('text-indigo-700', active);
+            });
+        }
+
         function renderTables() {
             const searchQuery = (document.getElementById('recordSearchInput').value || '').toLowerCase();
 
             // Render Monitoring Table
-            const filteredMon = monitoringList.filter(item => {
+            const filteredMon = sortList('mon', monitoringList.filter(item => {
                 return item.engineer.toLowerCase().includes(searchQuery) ||
                        item.line.toLowerCase().includes(searchQuery) ||
                        item.currentStyle.toLowerCase().includes(searchQuery) ||
                        item.nextStyle.toLowerCase().includes(searchQuery) ||
                        item.remark.toLowerCase().includes(searchQuery);
-            });
+            }));
 
             document.getElementById('monitoringCountText').innerText = `Total: ${filteredMon.length} Data`;
             const tbodyMon = document.getElementById('tableMonitoringBody');
@@ -1281,13 +1322,13 @@
             }
 
             // Render Overline Table
-            const filteredOvr = overlineList.filter(item => {
+            const filteredOvr = sortList('ovr', overlineList.filter(item => {
                 return item.engineer.toLowerCase().includes(searchQuery) ||
                        item.line.toLowerCase().includes(searchQuery) ||
                        item.currentStyle.toLowerCase().includes(searchQuery) ||
                        item.nextStyle.toLowerCase().includes(searchQuery) ||
                        item.remark.toLowerCase().includes(searchQuery);
-            });
+            }));
 
             document.getElementById('overlineCountText').innerText = `Total: ${filteredOvr.length} Data`;
             const tbodyOvr = document.getElementById('tableOverlineBody');
@@ -1317,6 +1358,7 @@
                 }).join('');
             }
 
+            updateSortIndicators();
             safeIcons();
         }
 
@@ -1535,11 +1577,11 @@
         function exportToExcel() {
             if (typeof XLSX === 'undefined') return showToast('Library Excel gagal dimuat. Matikan ad blocker lalu refresh.');
 
-            const monRows = monitoringList.map(m => [
+            const monRows = sortList('mon', monitoringList).map(m => [
                 m.reportDate, m.engineer, m.line, m.currentStyle, m.nextStyle, m.plannedStartDate,
                 m.preLayoutStatus, m.ppApprovalStatus, chiefLabel(m.chiefSampleStatus), m.remark
             ]);
-            const ovrRows = overlineList.map(o => [
+            const ovrRows = sortList('ovr', overlineList).map(o => [
                 o.reportWeekStart, o.engineer, o.line, o.currentStyle, o.nextStyle,
                 o.plannedOverlineDate, o.status, o.remark
             ]);
